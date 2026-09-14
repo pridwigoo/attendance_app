@@ -1,27 +1,42 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
+import '../storage/storage_service.dart';
+
 class ApiClient {
-  // Gunakan 10.0.2.2 jika menggunakan Emulator Android, 
-  // atau IP lokal komputer (misal 192.168.x.x) jika menggunakan HP fisik.
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
+  static const String baseUrl = 'http://10.0.2.2:8000/api/v1';
+  final StorageService _storage = StorageService();
 
-  Future<bool> checkHealth() async {
-    try {
-      final response = await http
-          .get(
-            Uri.parse('$baseUrl/health-check'),
-            headers: {'Accept': 'application/json'},
-          )
-          .timeout(const Duration(seconds: 5));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['status'] == 'success';
+  Future<Map<String, String>> _headers({bool withAuth = false}) async {
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    if (withAuth) {
+      final token = await _storage.getToken();
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
       }
-      return false;
-    } catch (e) {
-      return false;
     }
+    return headers;
+  }
+
+  Future<http.Response> post(
+    String endpoint,
+    Map<String, dynamic> body, {
+    bool withAuth = false,
+  }) async {
+    final headers = await _headers(withAuth: withAuth);
+    return await http.post(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: headers,
+      body: jsonEncode(body),
+    );
+  }
+
+  Future<http.Response> get(String endpoint, {bool withAuth = true}) async {
+    final headers = await _headers(withAuth: withAuth);
+    return await http.get(Uri.parse('$baseUrl$endpoint'), headers: headers);
   }
 }
