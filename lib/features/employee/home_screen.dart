@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/network/api_client.dart';
 import '../auth/auth_provider.dart';
 import '../auth/login_screen.dart';
+import '../face/face_register_screen.dart';
 import '../location/location_request_screen.dart';
 import '../attendance/attendance_action_screen.dart';
 import '../attendance/attendance_history_screen.dart';
@@ -234,6 +235,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               },
               icon: const Icon(Icons.add_location_alt),
               label: const Text('Kelola / Ajukan Lokasi Absensi'),
+            ),
+            OutlinedButton.icon(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FaceRegisterScreen()),
+                );
+              },
+              icon: const Icon(Icons.face),
+              label: const Text('Registrasi / Update Wajah'),
             ),
           ],
         ),
