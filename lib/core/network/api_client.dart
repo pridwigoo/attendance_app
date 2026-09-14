@@ -5,7 +5,10 @@ import 'package:http/http.dart' as http;
 import '../storage/storage_service.dart';
 
 class ApiClient {
-  static const String baseUrl = 'http://10.0.2.2:8000/api/v1';
+  //emulator
+  // static const String baseUrl = 'http://10.0.2.2:8000/api/v1'; 
+    //android device
+  static const String baseUrl = 'http://192.168.1.3:8000/api/v1'; 
   final StorageService _storage = StorageService();
 
   Future<Map<String, String>> _headers({bool withAuth = false}) async {

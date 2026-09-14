@@ -5,6 +5,7 @@ import 'features/auth/login_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // Jalankan aplikasi langsung tanpa dihambat oleh await lokasi
   runApp(const ProviderScope(child: MyApp()));
 }
 

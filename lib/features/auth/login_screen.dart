@@ -16,10 +16,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  // 1. Wajib dispose controller untuk mencegah memory leak
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   void _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // 2. Validasi input sederhana sebelum request API
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Email dan password wajib diisi'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Hindari interaksi pengguna ganda saat loading
+    FocusScope.of(context).unfocus();
+
     final success = await ref
         .read(authProvider.notifier)
-        .login(_emailController.text.trim(), _passwordController.text.trim());
+        .login(email, password);
 
     if (mounted) {
       if (success) {
@@ -31,7 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         final error = ref.read(authProvider).error;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error.toString()),
+            content: Text(error?.toString() ?? 'Terjadi kesalahan saat login'),
             backgroundColor: Colors.red,
           ),
         );
@@ -54,12 +79,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
               keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _handleLogin(), // Login saat tekan Enter di keyboard
             ),
             const SizedBox(height: 24),
             authState.isLoading
